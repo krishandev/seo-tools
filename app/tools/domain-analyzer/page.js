@@ -13,229 +13,248 @@ export default function DomainAnalyzer() {
   const [result, setResult] =
     useState(null);
 
-  // =========================
-  // ANALYZE DOMAIN
-  // =========================
+    const [error, setError] =
+useState("");
 
-  const analyzeDomain =
-    async () => {
+async function analyzeWebsite() {
 
-      try {
+  if (!url) return;
 
-        setLoading(true);
+  try {
 
-        const response =
-          await fetch(
-            "/api/domain-analyzer",
-            {
-              method: "POST",
+    setLoading(true);
+    setResult(null);
 
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body: JSON.stringify({
-                url,
-              }),
-
-            }
-          );
-
-        const data =
-          await response.json();
-
-        setResult(data);
-
+    const response = await fetch(
+      "/api/domain-analyzer",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          url
+        })
       }
+    );
 
-      catch (error) {
+    const data =
+      await response.json();
 
-        console.log(error);
+    console.log(
+      "API RESPONSE:",
+      data
+    );
 
-      }
-
-      finally {
-
-        setLoading(false);
-
-      }
-
-    };
-
-  // =========================
-  // COPY REPORT
-  // =========================
-
-  const copyReport =
-    () => {
-
-      const report = `
-
-SEO SCORE:
-${result?.seoScore}/100
-
-DOMAIN AGE:
-${result?.domainAge}
-
-TITLE:
-${result?.title}
-
-TITLE LENGTH:
-${result?.titleLength}
-
-META DESCRIPTION:
-${result?.metaDescription}
-
-DESCRIPTION LENGTH:
-${result?.metaDescriptionLength}
-
-CANONICAL:
-${result?.canonical}
-
-ROBOTS:
-${result?.robots}
-
-HTTPS:
-${result?.https ? "Yes" : "No"}
-
-H1 COUNT:
-${result?.h1Count}
-
-H2 COUNT:
-${result?.h2Count}
-
-INTERNAL LINKS:
-${result?.internalLinks}
-
-EXTERNAL LINKS:
-${result?.externalLinks}
-
-TOTAL IMAGES:
-${result?.totalImages}
-
-MISSING ALT TAGS:
-${result?.missingAltCount}
-
-OPEN GRAPH:
-${result?.openGraph ? "Yes" : "No"}
-
-TWITTER CARDS:
-${result?.twitterCards ? "Yes" : "No"}
-
-SCHEMA:
-${result?.schemaDetected ? "Yes" : "No"}
-
-`;
-
-      navigator.clipboard.writeText(
-        report
-      );
+    if(!data.success){
 
       alert(
-        "SEO Report Copied!"
+        data.message ||
+        "Error analyzing website"
       );
 
-    };
+      return;
+    }
 
-  // =========================
-  // STATUS BADGE
-  // =========================
+    setResult(data);
 
-  const getStatusBadge = (
-    value
-  ) => {
+  }
 
-    return value
+  catch(error){
+
+    console.log(
+      "Frontend Error:",
+      error
+    );
+
+    alert(
+      "Something went wrong"
+    );
+
+  }
+
+  finally{
+
+    setLoading(false);
+
+  }
+
+}
+
+  // ======================
+
+  function badge(status) {
+
+    return status
 
       ? "bg-green-100 text-green-700"
 
       : "bg-red-100 text-red-700";
 
-  };
+  }
 
-  // =========================
-  // SCORE COLOR
-  // =========================
+  // ======================
 
-  const getScoreColor =
-    (score) => {
+  function scoreColor(score) {
 
-      if (score >= 80)
-        return "bg-green-500";
+    if (score >= 80)
+      return "bg-green-500";
 
-      if (score >= 50)
-        return "bg-yellow-500";
+    if (score >= 50)
+      return "bg-yellow-500";
 
-      return "bg-red-500";
+    return "bg-red-500";
 
-    };
+  }
+
+  // ======================
+
+  function copyReport() {
+
+    const report = `
+
+SEO SCORE:
+${result?.seoScore}/100
+
+TITLE:
+${result?.title}
+
+META DESCRIPTION:
+${result?.metaDescription}
+
+DOMAIN AGE:
+${result?.domainAge}
+
+BROKEN LINKS:
+${result?.brokenLinks?.count}
+
+MISSING ALT:
+${result?.images?.missingAltCount}
+
+SSL:
+${result?.ssl ? "Yes" : "No"}
+
+SCHEMA:
+${result?.schema?.exists ? "Yes" : "No"}
+
+`;
+
+    navigator.clipboard.writeText(
+      report
+    );
+
+    alert(
+      "SEO Report copied"
+    );
+
+  }
 
   return (
 
-    <main className="max-w-7xl mx-auto p-10">
+    <main className="max-w-7xl mx-auto px-6 py-10">
 
-      {/* HEADING */}
+      {/* Heading */}
 
-      <h1 className="text-5xl font-bold mb-4">
+      <div className="mb-8">
 
-        Domain Analyzer
+        <h1 className="text-5xl font-bold">
 
-      </h1>
+          Domain Analyzer
+        </h1>
 
-      <p className="text-gray-500 text-lg mb-10">
+        <p className="text-gray-500 mt-3">
 
-        Analyze your website SEO, technical SEO, links, schema, and metadata.
+          Complete SEO & Technical SEO Audit Tool
 
-      </p>
+        </p>
 
-      {/* INPUT CARD */}
+      </div>
 
-      <div className="border rounded-3xl p-6 shadow-sm bg-white">
+      {/* Input */}
+
+      <div className="bg-white rounded-3xl p-6 shadow">
 
         <input
           type="text"
-          placeholder="Enter Website URL"
           value={url}
-          onChange={(e) =>
+          onChange={(e)=>
             setUrl(
               e.target.value
             )
           }
-          className="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-black"
+          placeholder="Enter website URL"
+          className="w-full border p-4 rounded-xl"
         />
 
         <button
-          onClick={analyzeDomain}
-          disabled={loading}
-          className={`mt-6 px-8 py-4 rounded-xl text-white transition-all duration-300 ${
+
+          onClick={
+            analyzeWebsite
+          }
+          
+
+          disabled={
             loading
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-black hover:bg-gray-800"
+          }
+
+          className={`mt-6 px-8 py-4 rounded-xl text-white
+
+          ${
+            loading
+            ?
+
+            "bg-gray-500"
+
+            :
+
+            "bg-black hover:bg-gray-800"
           }`}
+
         >
 
           {
+error && (
+
+<p className="text-red-500 mt-4">
+
+{error}
+
+</p>
+
+)
+}
+
+          {
+
             loading
-              ? "Analyzing Website..."
-              : "Analyze Website"
+
+            ?
+
+            "Analyzing..."
+
+            :
+
+            "Analyze Website"
+
           }
 
         </button>
 
       </div>
 
-      {/* LOADING */}
+      {/* Loading */}
 
-      {loading && (
+      {
 
-        <div className="mt-10 border rounded-3xl p-6 shadow-sm bg-white">
+        loading &&
 
-          <div className="flex items-center gap-4">
+        <div className="mt-8 bg-white p-8 rounded-3xl shadow">
 
-            <div className="w-6 h-6 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex gap-4">
 
-            <p className="font-medium">
+            <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"/>
+
+            <p>
 
               Running SEO audit...
 
@@ -245,556 +264,480 @@ ${result?.schemaDetected ? "Yes" : "No"}
 
         </div>
 
-      )}
+      }
 
-      {/* RESULTS */}
+      {/* Result */}
 
-      {result?.success && (
+      {
 
-        <div className="mt-10 space-y-6">
+        result?.success && (
 
-          {/* HEADER */}
+          <div className="mt-10 space-y-6">
 
-          <div className="flex flex-wrap justify-between items-center gap-4">
+            {/* Header */}
 
-            <div>
+            <div className="flex justify-between flex-wrap gap-5">
 
-              <h2 className="text-3xl font-bold">
+              <div>
 
-                SEO Audit Report
+                <h2 className="text-3xl font-bold">
 
-              </h2>
+                  SEO Audit Report
 
-              <p className="text-gray-500 mt-1 break-all">
+                </h2>
 
-                {url}
+                <p className="text-gray-500">
 
-              </p>
+                  {url}
+
+                </p>
+
+              </div>
+
+              <button
+
+                onClick={
+                  copyReport
+                }
+
+                className="bg-black text-white px-6 py-3 rounded-xl"
+
+              >
+
+                Copy Report
+
+              </button>
 
             </div>
 
-            <button
-              onClick={
-                copyReport
+            {/* Score */}
+
+            <div className="bg-white p-8 rounded-3xl shadow">
+
+              <p className="text-gray-500">
+
+                SEO Score
+
+              </p>
+
+              <h3 className="text-6xl font-bold">
+
+                {result?.seoScore}/100
+
+              </h3>
+
+              <div className="w-full bg-gray-200 rounded-full h-5 mt-5">
+
+                <div
+
+                  className={`h-5 rounded-full ${scoreColor(
+
+                    result?.seoScore
+
+                  )}`}
+
+                  style={{
+
+                    width:
+
+                    `${result?.seoScore}%`
+
+                  }}
+
+                />
+
+              </div>
+
+            </div>
+
+            {/* Overview */}
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+              <Card
+                title="Domain Age"
+                value={
+                  result?.domainAge
+                }
+              />
+
+              <Card
+                title="Backlink Score"
+                value={
+                  result?.backlinkScore
+                }
+              />
+
+              <Card
+                title="Missing Alt"
+                value={
+                  result?.images?.missingAltCount
+                }
+              />
+
+              <Card
+                title="Broken Links"
+                value={
+                  result?.brokenLinks?.count
+                }
+              />
+
+            </div>
+
+            {/* Status */}
+
+            <div className="grid lg:grid-cols-3 gap-6">
+
+              <StatusCard
+                title="SSL"
+                status={
+                  result?.ssl
+                }
+              />
+
+              <StatusCard
+                title="Schema"
+                status={
+                  result?.schema?.exists
+                }
+              />
+
+              <StatusCard
+                title="Open Graph"
+                status={
+                  result?.openGraph
+                }
+              />
+
+              <StatusCard
+                title="Twitter Cards"
+                status={
+                  result?.twitter
+                }
+              />
+
+              <StatusCard
+                title="Google Analytics"
+                status={
+                  result?.analytics
+                }
+              />
+
+              <StatusCard
+                title="Robots.txt"
+                status={
+                  result?.robots?.exists
+                }
+              />
+
+            </div>
+
+            {/* Meta */}
+
+            <Section title="Meta SEO">
+
+              <Item
+                label="Title"
+                value={
+                  result?.title
+                }
+              />
+
+              <Item
+                label="Title Length"
+                value={
+                  result?.titleLength
+                }
+              />
+
+              <Item
+                label="Meta Description"
+                value={
+                  result?.metaDescription
+                }
+              />
+
+              <Item
+                label="Canonical"
+                value={
+                  result?.canonical
+                }
+              />
+
+            </Section>
+
+            {/* Headings */}
+
+            <Section title="Headings">
+
+              {
+
+                Object.entries(
+
+                  result?.headings || {}
+
+                ).map(
+
+                  ([tag,items])=>(
+
+                    <div
+                      key={tag}
+                      className="mb-5"
+                    >
+
+                      <h4 className="font-bold">
+
+                        {tag.toUpperCase()} ({items.length})
+
+                      </h4>
+
+                      {
+
+                        items.map(
+                          (item,index)=>(
+
+                            <div
+                              key={index}
+                              className="bg-gray-100 p-3 rounded mt-2"
+                            >
+
+                              {item}
+
+                            </div>
+
+                          )
+                        )
+
+                      }
+
+                    </div>
+
+                  )
+                )
+
               }
-              className="bg-black text-white px-5 py-3 rounded-xl hover:bg-gray-800 transition"
-            >
 
-              Copy SEO Report
+            </Section>
 
-            </button>
+            {/* Missing Alt */}
 
-          </div>
+            <Section title="Missing Alt Images">
 
-          {/* SCORE CARD */}
+              {
 
-          <div className="border rounded-3xl p-8 shadow-sm bg-white overflow-hidden">
+                result?.images?.missingAlt?.map(
 
-            <div className="flex flex-col lg:flex-row gap-8 items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500 mb-3">
-
-                  SEO Score
-
-                </p>
-
-                <h3 className="text-6xl font-bold">
-
-                  {result?.seoScore}/100
-
-                </h3>
-
-              </div>
-
-              <div className="w-full lg:w-2/3">
-
-                <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
-
-                  <div
-                    className={`h-6 rounded-full transition-all duration-700 ${getScoreColor(
-                      result?.seoScore
-                    )}`}
-                    style={{
-                      width:
-                        `${result?.seoScore}%`,
-                    }}
-                  ></div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* DASHBOARD */}
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            {/* DOMAIN AGE */}
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-2">
-
-                Domain Age
-
-              </p>
-
-              <h3 className="text-3xl font-bold">
-
-                {result?.domainAge}
-
-              </h3>
-
-            </div>
-
-            {/* HTTPS */}
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-3">
-
-                HTTPS
-
-              </p>
-
-              <span
-                className={`px-4 py-2 rounded-full font-medium ${getStatusBadge(
-                  result?.https
-                )}`}
-              >
-
-                {
-                  result?.https
-                    ? "Enabled"
-                    : "Not Enabled"
-                }
-
-              </span>
-
-            </div>
-
-            {/* SCHEMA */}
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-3">
-
-                Schema Markup
-
-              </p>
-
-              <span
-                className={`px-4 py-2 rounded-full font-medium ${getStatusBadge(
-                  result?.schemaDetected
-                )}`}
-              >
-
-                {
-                  result?.schemaDetected
-                    ? "Detected"
-                    : "Not Found"
-                }
-
-              </span>
-
-            </div>
-
-            {/* OPEN GRAPH */}
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-3">
-
-                Open Graph
-
-              </p>
-
-              <span
-                className={`px-4 py-2 rounded-full font-medium ${getStatusBadge(
-                  result?.openGraph
-                )}`}
-              >
-
-                {
-                  result?.openGraph
-                    ? "Detected"
-                    : "Not Found"
-                }
-
-              </span>
-
-            </div>
-
-            {/* TWITTER */}
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-3">
-
-                Twitter Cards
-
-              </p>
-
-              <span
-                className={`px-4 py-2 rounded-full font-medium ${getStatusBadge(
-                  result?.twitterCards
-                )}`}
-              >
-
-                {
-                  result?.twitterCards
-                    ? "Detected"
-                    : "Not Found"
-                }
-
-              </span>
-
-            </div>
-
-            {/* VIEWPORT */}
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white overflow-hidden">
-
-              <p className="text-gray-500 mb-3">
-
-                Mobile Viewport
-
-              </p>
-
-              <span
-                className={`px-4 py-2 rounded-full font-medium ${getStatusBadge(
-                  result?.viewport
-                )}`}
-              >
-
-                {
-                  result?.viewport
-                    ? "Optimized"
-                    : "Missing"
-                }
-
-              </span>
-
-            </div>
-
-          </div>
-
-          {/* META SEO */}
-
-          <div className="border rounded-3xl p-6 shadow-sm bg-white overflow-hidden">
-
-            <h3 className="text-2xl font-bold mb-6">
-
-              Meta SEO
-
-            </h3>
-
-            <div className="space-y-5">
-
-              <div>
-
-                <p className="text-gray-500 mb-1">
-
-                  Title
-
-                </p>
-
-                <p className="font-medium break-all">
-
-                  {result?.title}
-
-                </p>
-
-                <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
-
-                  <div
-                    className={`h-3 rounded-full ${
-                      result?.titleLength >= 50 &&
-                      result?.titleLength <= 60
-                        ? "bg-green-500"
-                        : "bg-yellow-500"
-                    }`}
-                    style={{
-                      width:
-                        `${Math.min(
-                          result?.titleLength,
-                          100
-                        )}%`,
-                    }}
-                  ></div>
-
-                </div>
-
-                <p className="text-sm text-gray-500 mt-1">
-
-                  {result?.titleLength} Characters
-
-                </p>
-
-              </div>
-
-              <div>
-
-                <p className="text-gray-500 mb-1">
-
-                  Meta Description
-
-                </p>
-
-                <p className="font-medium break-all">
-
-                  {
-                    result?.metaDescription
-                  }
-
-                </p>
-
-                <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
-
-                  <div
-                    className={`h-3 rounded-full ${
-                      result?.metaDescriptionLength >=
-                        150 &&
-                      result?.metaDescriptionLength <=
-                        160
-                        ? "bg-green-500"
-                        : "bg-yellow-500"
-                    }`}
-                    style={{
-                      width:
-                        `${Math.min(
-                          result?.metaDescriptionLength,
-                          100
-                        )}%`,
-                    }}
-                  ></div>
-
-                </div>
-
-                <p className="text-sm text-gray-500 mt-1">
-
-                  {
-                    result?.metaDescriptionLength
-                  } Characters
-
-                </p>
-
-              </div>
-
-              <div>
-
-                <p className="text-gray-500 mb-1">
-
-                  Canonical URL
-
-                </p>
-
-                <p className="font-medium break-all">
-
-                  {result?.canonical || "Not Found"}
-
-                </p>
-
-              </div>
-
-              <div>
-
-                <p className="text-gray-500 mb-1">
-
-                  Robots Meta
-
-                </p>
-
-                <p className="font-medium break-all">
-
-                  {result?.robots || "Not Found"}
-
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* HEADINGS */}
-
-          <div className="grid md:grid-cols-2 gap-6">
-
-            {/* H1 */}
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white overflow-hidden">
-
-              <h3 className="text-2xl font-bold mb-5">
-
-                H1 Tags ({result?.h1Count})
-
-              </h3>
-
-              <div className="space-y-3">
-
-                {result?.h1Tags?.map(
-                  (
-                    tag,
-                    index
-                  ) => (
+                  (img,index)=>(
 
                     <div
                       key={index}
-                      className="bg-gray-100 p-3 rounded-xl break-all"
+                      className="bg-red-50 p-3 rounded mb-2 break-all"
                     >
 
-                      {tag}
+                      {img}
 
                     </div>
 
                   )
-                )}
 
-              </div>
+                )
 
-            </div>
+              }
 
-            {/* H2 */}
+            </Section>
 
-            <div className="border rounded-3xl p-6 shadow-sm bg-white overflow-hidden">
+            {/* Social */}
 
-              <h3 className="text-2xl font-bold mb-5">
+            <Section title="Social Profiles">
 
-                H2 Tags ({result?.h2Count})
+              {
 
-              </h3>
+                result?.socialProfiles?.map(
 
-              <div className="space-y-3">
+                  (social,index)=>(
 
-                {result?.h2Tags?.map(
-                  (
-                    tag,
-                    index
-                  ) => (
+                    <a
 
-                    <div
+                      href={social}
+
                       key={index}
-                      className="bg-gray-100 p-3 rounded-xl break-all"
+
+                      target="_blank"
+
+                      className="block text-blue-600 underline mb-3"
+
                     >
 
-                      {tag}
+                      {social}
 
-                    </div>
+                    </a>
 
                   )
-                )}
 
-              </div>
+                )
 
-            </div>
+              }
 
-          </div>
-
-          {/* LINKS & IMAGES */}
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-2">
-
-                Internal Links
-
-              </p>
-
-              <h3 className="text-4xl font-bold">
-
-                {result?.internalLinks}
-
-              </h3>
-
-            </div>
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-2">
-
-                External Links
-
-              </p>
-
-              <h3 className="text-4xl font-bold">
-
-                {result?.externalLinks}
-
-              </h3>
-
-            </div>
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-2">
-
-                Total Images
-
-              </p>
-
-              <h3 className="text-4xl font-bold">
-
-                {result?.totalImages}
-
-              </h3>
-
-            </div>
-
-            <div className="border rounded-3xl p-6 shadow-sm bg-white">
-
-              <p className="text-gray-500 mb-2">
-
-                Missing Alt Tags
-
-              </p>
-
-              <h3 className="text-4xl font-bold">
-
-                {result?.missingAltCount}
-
-              </h3>
-
-            </div>
+            </Section>
 
           </div>
 
-        </div>
+        )
 
-      )}
-
-      {/* EMPTY STATE */}
-
-      {!loading &&
-        !result && (
-
-          <div className="mt-10 border rounded-3xl p-10 text-center bg-gray-50">
-
-            <h3 className="text-2xl font-bold mb-3">
-
-              No Analysis Yet
-
-            </h3>
-
-            <p className="text-gray-500">
-
-              Enter a website URL to run a complete SEO audit.
-
-            </p>
-
-          </div>
-
-        )}
+      }
 
     </main>
 
   );
+
+}
+
+// =====================
+
+function Card({
+
+title,
+value
+
+}){
+
+return(
+
+<div className="bg-white p-6 rounded-3xl shadow">
+
+<p className="text-gray-500">
+
+{title}
+
+</p>
+
+<h3 className="text-3xl font-bold">
+
+{value}
+
+</h3>
+
+</div>
+
+);
+
+}
+
+// =====================
+
+function StatusCard({
+
+title,
+status
+
+}){
+
+return(
+
+<div className="bg-white p-6 rounded-3xl shadow">
+
+<p className="mb-3">
+
+{title}
+
+</p>
+
+<span
+
+className={`px-4 py-2 rounded-full
+
+${
+
+status
+
+?
+
+"bg-green-100 text-green-700"
+
+:
+
+"bg-red-100 text-red-700"
+
+}`}
+
+>
+
+{
+
+status
+
+?
+
+"Found"
+
+:
+
+"Not Found"
+
+}
+
+</span>
+
+</div>
+
+);
+
+}
+
+// =====================
+
+function Section({
+
+title,
+children
+
+}){
+
+return(
+
+<div className="bg-white p-8 rounded-3xl shadow">
+
+<h3 className="text-2xl font-bold mb-6">
+
+{title}
+
+</h3>
+
+{children}
+
+</div>
+
+);
+
+}
+
+// =====================
+
+function Item({
+
+label,
+value
+
+}){
+
+return(
+
+<div className="mb-4">
+
+<p className="text-gray-500">
+
+{label}
+
+</p>
+
+<p className="font-medium break-all">
+
+{value || "N/A"}
+
+</p>
+
+</div>
+
+);
 
 }
