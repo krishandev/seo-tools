@@ -29,7 +29,7 @@ description:"Analyze robots.txt files",
 
 applicationCategory:"SEO Tool",
 
-url:"https://yourdomain.com/tools/robots-tester"
+url:"https://seo-tools-xi.vercel.app/tools/robots-tester"
 
 };
 

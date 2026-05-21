@@ -44,7 +44,7 @@ name:
 "Free SEO Tools",
 
 url:
-"http://localhost:3000",
+"https://seo-tools-xi.vercel.app",
 
 description:
 "Free SEO tools for website analysis and technical SEO"
