@@ -81,7 +81,8 @@ d="M19.5 8.25l-7.5 7.5-7.5-7.5"
 ["Domain Analyzer","/tools/domain-analyzer"],
 ["Alt Text Checker","/tools/alt-text-checker"],
 ["Readability Checker","/tools/readability-checker"],
-["Robots Tester","/tools/robots-tester"]
+["Robots Tester","/tools/robots-tester"],
+["EEAT Score Checker","/tools/eeat-checker"]
 
 ].map((tool,index)=>(
 
@@ -194,7 +195,8 @@ Tools
 ["Domain Analyzer","/tools/domain-analyzer"],
 ["Alt Text Checker","/tools/alt-text-checker"],
 ["Readability Checker","/tools/readability-checker"],
-["Robots Tester","/tools/robots-tester"]
+["Robots Tester","/tools/robots-tester"],
+["EEAT Score Checker","/tools/eeat-checker"]
 
 ].map((tool,index)=>(
 

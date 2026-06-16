@@ -65,7 +65,15 @@ title:"Robots.txt Tester",
 description:"Analyze robots.txt and crawl rules.",
 url:"/tools/robots-tester",
 icon:"🤖"
+},
+
+{
+title:"EEAT Score Checker",
+description:"Analyze Experience, Expertise, Authoritativeness and Trustworthiness signals.",
+url:"/tools/eeat-checker",
+icon:"🏆"
 }
+
 
 ];
 
@@ -77,15 +85,14 @@ return(
 
 <h2 className="text-4xl md:text-5xl font-bold">
 
-SEO Tools
+Free SEO Tools Collection
 
 </h2>
 
-<p className="text-gray-600 mt-5 max-w-2xl mx-auto">
-
-Powerful free SEO tools to analyze websites,
-improve rankings, and fix technical SEO issues.
-
+<p className="text-gray-600 mt-5 max-w-3xl mx-auto">
+Analyze websites, audit technical SEO, check EEAT signals,
+optimize content, validate schema markup, test robots.txt,
+and improve search engine rankings with our free SEO tools.
 </p>
 
 </div>
@@ -183,13 +190,13 @@ website today.
 
 <Link
 
-href="/tools/domain-analyzer"
+href="/tools/eeat-checker"
 
-className="bg-white text-black px-8 py-4 rounded-xl"
+className="bg-white text-black px-8 py-4 rounded-xl hover:bg-gray-100 transition"
 
 >
 
-Start Using Tools
+🏆 Try EEAT Checker
 
 </Link>
 
